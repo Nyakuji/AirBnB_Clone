@@ -16,20 +16,20 @@ import shlex
 class HBNBCommand(cmd.Cmd):
     """Command processor for HBNB project"""
 
-    prompt = "(hbnb)"
+    prompt = "(hbnb) "
 
-    allowed_classes = ['BaseModel', 'User', 'Amenity', 'Place', 'City', 'State', 'Review']
-    allowed_commands = ['create', 'show', 'update', 'all', 'destroy', 'count']
+    __allowed_classes = ['BaseModel', 'User', 'Amenity', 'Place', 'City', 'State', 'Review']
+    __allowed_commands = ['create', 'show', 'update', 'all', 'destroy', 'count']
 
-    def precmd(self, arg):
-        """Parses command input"""
-        if '.' in arg and '(' in arg and ')' in arg:
-            class_method = arg.split('.')
-            command_and_args = class_method[1].split('(')
-            if class_method[0] in HBNBCommand.allowed_classes and command_and_args[0] in HBNBCommand.allowed_commands:
-                args = f"{command_and_args[0]}{class_method[0]} {args[0]}"
-            return arg
-        
+    # def precmd(self, arg):
+    #     """Parses command input"""
+    #     if '.' in arg and '(' in arg and ')' in arg:
+    #         class_method = arg.split('.')
+    #         command_and_args = class_method[1].split('(')
+    #         if class_method[0] in HBNBCommand.allowed_classes and command_and_args[0] in HBNBCommand.allowed_commands:
+    #             args = f"{command_and_args[0]}{class_method[0]} {args[0]}"
+    #         return arg
+
     def help_help(self):
         """Prints help command description"""
         print("Provides description of a given command")
@@ -43,17 +43,17 @@ class HBNBCommand(cmd.Cmd):
         count = 0
         all_objs = storage.all()
         for key, value in all_objs.items():
-            class_name = key.split('.') 
+            class_name = key.split('.')
             if class_name[0] == cls_name:
                 count += 1
         print(count)
-    
+
     def do_create(self, type_model):
         """Creates an instance according to a given class"""
 
         if not type_model:
             print("** class name missing **")
-        elif type_model not in HBNBCommand.allowed_classes:
+        elif type_model not in HBNBCommand.__allowed_classes:
             print("** class doesn't exist **")
         else:
             class_mapping = {
@@ -65,7 +65,7 @@ class HBNBCommand(cmd.Cmd):
             'State': State,
             'Review': Review
         }
-            
+
         selected_model = class_mapping[type_model]()
         print(selected_model.id)
         selected_model.save()
@@ -76,10 +76,10 @@ class HBNBCommand(cmd.Cmd):
         if not arg:
             print("** class name missing **")
             return
-        
+
         class_name, *instance_id = arg.split()
 
-        if class_name not in HBNBCommand.allowed_classes:
+        if class_name not in HBNBCommand.__allowed_classes:
             print("** class doesn't exist **")
         elif not instance_id:
             print("** instance id missing **")
@@ -90,18 +90,18 @@ class HBNBCommand(cmd.Cmd):
             for key, value in all_objs.items():
                 if value.__class__.__name__ == class_name and value.id == instance_id:
                     print(value)
-                    return   
-            print("** no instance found **") 
+                    return
+            print("** no instance found **")
     def do_destroy(self, arg):
         """Deletes an instance based on the class name and id (save the change into the JSON file)"""
 
         if not arg:
             print("** class name missing **")
             return
-        
+
         class_name, *instance_id = arg.split()
 
-        if class_name not in HBNBCommand.allowed_classes:
+        if class_name not in HBNBCommand.__allowed_classes:
             print("** class doesn't exist **")
         elif not instance_id:
             print("** instance id missing **")
@@ -123,26 +123,26 @@ class HBNBCommand(cmd.Cmd):
         if not arg:
             print("** class name missing **")
             return
-        
+
         class_name, *_ = arg.split()
 
-        if class_name not in HBNBCommand.allowed_classes:
+        if class_name not in HBNBCommand.__allowed_classes:
             print("** Class doesn't exist **")
         else:
             all_objs = storage.all()
             list_instances = [str(value) for value in all_objs.values() if value.__class__.__name__ == class_name]
             print(list_instances)
-    
+
     def do_update(self, arg):
         """Updates an instance based on the class name and id by adding or updating attribute (save the change into the JSON file)"""
 
         if not arg:
             print("** Class name missing **")
             return
-        
+
         args = shlex.split(arg.replace(',' ''))
 
-        if args[0] not in HBNBCommand.allowed_classes:
+        if args[0] not in HBNBCommand.__allowed_classes:
             print("** class doesn't exist **")
         elif len(args) == 1:
             print("** instance id missing **")
@@ -161,7 +161,7 @@ class HBNBCommand(cmd.Cmd):
                     return
 
             print("** No instance found **")
-    
+
     def do_quit(self, line):
         """ Quit command to exit the command interpreter """
         return True
