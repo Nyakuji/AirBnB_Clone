@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 """contains the entry point of the command interpreter"""
 import cmd
+import shlex
 from models import storage
 from models.base_model import BaseModel
 from models.user import User
@@ -9,8 +10,6 @@ from models.city import City
 from models.amenity import Amenity
 from models.state import State
 from models.review import Review
-import json
-import shlex
 
 
 class HBNBCommand(cmd.Cmd):
@@ -26,7 +25,7 @@ class HBNBCommand(cmd.Cmd):
         'City',
         'State',
         'Review'
-        ]
+    ]
     __allowed_commands = [
         'create',
         'show',
@@ -34,11 +33,21 @@ class HBNBCommand(cmd.Cmd):
         'all',
         'destroy',
         'count'
-        ]
+    ]
+
+    class_mapping = {
+        'BaseModel': BaseModel,
+        'User': User,
+        'Place': Place,
+        'City': City,
+        'Amenity': Amenity,
+        'State': State,
+        'Review': Review
+    }
 
     def help_help(self):
         """Prints help command description"""
-        print("Provides description of a given command")
+        print("Provides a description of a given command")
 
     def emptyline(self):
         """Do nothing when an empty line is entered"""
@@ -62,19 +71,9 @@ class HBNBCommand(cmd.Cmd):
         elif type_model not in HBNBCommand.__allowed_classes:
             print("** class doesn't exist **")
         else:
-            class_mapping = {
-                'BaseModel': BaseModel,
-                'User': User,
-                'Place': Place,
-                'City': City,
-                'Amenity': Amenity,
-                'State': State,
-                'Review': Review
-                }
-
-        selected_model = class_mapping[type_model]()
-        print(selected_model.id)
-        selected_model.save()
+            selected_model = HBNBCommand.class_mapping[type_model]()
+            print(selected_model.id)
+            selected_model.save()
 
     def do_show(self, arg):
         """
@@ -95,9 +94,9 @@ class HBNBCommand(cmd.Cmd):
         else:
             instance_id = instance_id[0].strip('"')
             all_objs = storage.all()
-            className = value.__class__.__name__ == class_name
-            instanceId = value.id == instance_id
             for key, value in all_objs.items():
+                className = value.__class__.__name__ == class_name
+                instanceId = value.id == instance_id
                 if className and instanceId:
                     print(value)
                     return
@@ -146,17 +145,18 @@ class HBNBCommand(cmd.Cmd):
         class_name, *_ = arg.split()
 
         if class_name not in HBNBCommand.__allowed_classes:
-            print("** Class doesn't exist **")
+            print("** class doesn't exist **")
         else:
             all_objs = storage.all()
 
             def condition(value):
-                return (value.__class__.__name__ == class_name)
+                return value.__class__.__name__ == class_name
+
             list_instances = [
                 str(value)
                 for value in all_objs.values()
                 if condition(value)
-                ]
+            ]
             print(list_instances)
 
     def do_update(self, arg):
@@ -167,10 +167,10 @@ class HBNBCommand(cmd.Cmd):
         """
 
         if not arg:
-            print("** Class name missing **")
+            print("** class name missing **")
             return
 
-        args = shlex.split(arg.replace(',' ''))
+        args = shlex.split(arg.replace(',', ''))
 
         if args[0] not in HBNBCommand.__allowed_classes:
             print("** class doesn't exist **")
@@ -190,7 +190,7 @@ class HBNBCommand(cmd.Cmd):
                     storage.save()
                     return
 
-            print("** No instance found **")
+            print("** no instance found **")
 
     def do_quit(self, line):
         """ Quit command to exit the command interpreter """
@@ -203,3 +203,4 @@ class HBNBCommand(cmd.Cmd):
 
 if __name__ == '__main__':
     HBNBCommand().cmdloop()
+
