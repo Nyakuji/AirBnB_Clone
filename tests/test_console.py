@@ -10,6 +10,7 @@ import pep8
 from models.engine.file_storage import FileStorage
 from console import HBNBCommand
 
+
 class TestHBNBCommand(unittest.TestCase):
     '''Some unittests to test the HBNB command interpreter'''
 
@@ -74,22 +75,22 @@ class TestHBNBCommand(unittest.TestCase):
 
     def test_emptyline(self):
         '''Test empty line input'''
-        with patch ('sys.stdout', new= StringIO()) as f:
+        with patch('sys.stdout', new=StringIO()) as f:
             self.HBNB.onecmd('\n')
             self.assertEqual('', f.getvalue())
 
     def test_quit(self):
         '''Test quit command'''
-        with patch ('sys.stdout', new= StringIO()) as f:
+        with patch('sys.stdout', new=StringIO()) as f:
             self.HBNB.onecmd('quit')
             self.assertEqual('', f.getvalue())
 
     def test_create_errors(self):
         '''Test create command errors'''
-        with patch ('sys.stdout', new= StringIO()) as f:
+        with patch('sys.stdout', new=StringIO()) as f:
             self.HBNB.onecmd('create')
             self.assertEqual("** class name missing **\n", f.getvalue())
-        with patch ('sys.stdout', new= StringIO()) as f:
+        with patch('sys.stdout', new=StringIO()) as f:
             self.HBNB.onecmd('create MyModel')
             self.assertEqual("** class doesn't exist **\n", f.getvalue())
 
@@ -156,7 +157,7 @@ class TestHBNBCommand(unittest.TestCase):
             self.assertIn("'latitude': 37.77", output)
             self.assertNotIn("'longitude'", output)
 
-        def test_show(self):
+    def test_show(self):
         """Test show command."""
         with patch("sys.stdout", new=StringIO()) as f:
             self.HBNB.onecmd("show")
@@ -193,6 +194,7 @@ class TestHBNBCommand(unittest.TestCase):
             self.HBNB.onecmd("destroy BaseModel 12345")
             self.assertEqual(
                 "** no instance found **\n", f.getvalue())
+
     def test_all(self):
         """Test all command input."""
         with patch('sys.stdout', new=StringIO()) as f:
@@ -201,6 +203,7 @@ class TestHBNBCommand(unittest.TestCase):
         with patch("sys.stdout", new=StringIO()) as f:
             self.HBNB.onecmd("all State")
             self.assertEqual("[]\n", f.getvalue())
+
     def test_update(self):
         """Test update command input."""
         with patch("sys.stdout", new=StringIO()) as f:
@@ -232,5 +235,7 @@ class TestHBNBCommand(unittest.TestCase):
             self.assertEqual(
                 "** value missing **\n", f.getvalue())
 
+
 if __name__ == "__main__":
     unittest.main()
+
