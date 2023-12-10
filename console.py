@@ -54,27 +54,52 @@ class HBNBCommand(cmd.Cmd):
                 count += 1
         print(count)
 
-    def do_create(self, type_model):
-        """Creates an instance according to a given class"""
+    def do_create(self, args):
+        """Creates an instance according to a given class with attributes"""
 
-        if not type_model:
+        # Split the arguments into class name and attributes
+        args_list = shlex.split(args)
+        if len(args_list) == 0:
             print("** class name missing **")
-        elif type_model not in HBNBCommand.__allowed_classes:
-            print("** class doesn't exist **")
-        else:
-            class_mapping = {
-                'BaseModel': BaseModel,
-                'User': User,
-                'Place': Place,
-                'City': City,
-                'Amenity': Amenity,
-                'State': State,
-                'Review': Review
-                }
+            return
 
-        selected_model = class_mapping[type_model]()
-        print(selected_model.id)
-        selected_model.save()
+        class_name = args_list[0]
+
+        if class_name not in HBNBCommand.__allowed_classes:
+            print("** class doesn't exist **")
+            return
+
+        # Extract attributes and their values from the arguments
+        attributes = {}
+        for arg in args_list[1:]:
+            # Split each argument to extract attribute and value
+            split_arg = arg.split("=")
+            attr_name = split_arg[0]
+            attr_value = split_arg[1].strip('"')
+            attributes[attr_name] = attr_value
+
+        # Create an instance of the specified class
+        class_mapping = {
+            'BaseModel': BaseModel,
+            'User': User,
+            'Place': Place,
+            'City': City,
+            'Amenity': Amenity,
+            'State': State,
+            'Review': Review
+        }
+
+        if class_name in class_mapping:
+            selected_model = class_mapping[class_name]()
+            # Set attributes for the instance
+            for attr, value in attributes.items():
+                setattr(selected_model, attr, value)
+
+            print(selected_model.id)
+            selected_model.save()
+        else:
+            print("** class doesn't exist **")
+
 
     def do_show(self, arg):
         """
@@ -95,10 +120,10 @@ class HBNBCommand(cmd.Cmd):
         else:
             instance_id = instance_id[0].strip('"')
             all_objs = storage.all()
-            className = value.__class__.__name__ == class_name
-            instanceId = value.id == instance_id
+            # class_match = value.__class__.__name__ == class_name
+            # id_match = value.id == instance_id
             for key, value in all_objs.items():
-                if className and instanceId:
+                if value.__class__.__name__ == class_name and value.id == instance_id:
                     print(value)
                     return
             print("** no instance found **")
@@ -113,7 +138,7 @@ class HBNBCommand(cmd.Cmd):
             print("** class name missing **")
             return
 
-        class_name, *instance_id = arg.split()
+        class_name, *instance_id = arg.split(" ")
 
         if class_name not in HBNBCommand.__allowed_classes:
             print("** class doesn't exist **")
@@ -146,7 +171,7 @@ class HBNBCommand(cmd.Cmd):
         class_name, *_ = arg.split()
 
         if class_name not in HBNBCommand.__allowed_classes:
-            print("** Class doesn't exist **")
+            print("** class doesn't exist **")
         else:
             all_objs = storage.all()
 
@@ -167,30 +192,34 @@ class HBNBCommand(cmd.Cmd):
         """
 
         if not arg:
-            print("** Class name missing **")
+            print("** class name missing **")
             return
 
-        args = shlex.split(arg.replace(',' ''))
+        args = shlex.split(arg, " ")
+        # print (args, len(args))
 
         if args[0] not in HBNBCommand.__allowed_classes:
             print("** class doesn't exist **")
-        elif len(args) == 1:
+            return
+        elif len(args) < 2:
             print("** instance id missing **")
-        elif len(args) == 2:
-            print("** attribute name missing **")
-        elif len(args) == 3:
-            print("** value missing **")
-        else:
-            all_objs = storage.all()
-            for key, obj_instance in all_objs.items():
-                obj_name = obj_instance.__class__.__name__
-                obj_id = obj_instance.id
-                if obj_name == args[0] and obj_id == args[1].strip('"'):
-                    setattr(obj_instance, args[2], args[3])
-                    storage.save()
-                    return
+            return
+        obj_key = args[0] + '.' + args[1]
+        all_objs = storage.all()
 
-            print("** No instance found **")
+        if obj_key not in all_objs:
+            print("** no instance found **")
+            return
+        elif len(args) < 3:
+            print("** attribute name missing **")
+            return
+        elif len(args) < 4:
+            print("** value missing **")
+            return
+
+        obj_instance = all_objs[obj_key]
+        setattr(obj_instance, args[2], args[3])
+        storage.save()
 
     def do_quit(self, line):
         """ Quit command to exit the command interpreter """

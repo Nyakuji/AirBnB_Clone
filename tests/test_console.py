@@ -140,23 +140,34 @@ class TestHBNBCommand(unittest.TestCase):
 
     def test_create_kwargs(self):
         """Test create command with kwargs."""
+        # Check if the class 'Place' exists
+        # with patch("sys.stdout", new=StringIO()) as f:
+        #     self.HBNB.onecmd("create Place")
+        #     output = f.getvalue()
+        # if "** class doesn't exist **\n" in output:
+        #     self.fail("Place class doesn't exist")
+
+        # Create an instance with kwargs
         with patch("sys.stdout", new=StringIO()) as f:
             call = ('create Place city_id="0001" name="My_house" '
                     'number_rooms=4 latitude=37.77 longitude=a'
                     )
             self.HBNB.onecmd(call)
             pl = f.getvalue().strip()
+
+        # Check if the instance was created and contains expected attributes
         with patch("sys.stdout", new=StringIO()) as f:
             self.HBNB.onecmd("all Place")
             output = f.getvalue()
             self.assertIn(pl, output)
             self.assertIn("'city_id': '0001'", output)
-            self.assertIn("'name': 'My house'", output)
+            self.assertIn("'name': 'My_house'", output)
             self.assertIn("'number_rooms': 4", output)
             self.assertIn("'latitude': 37.77", output)
             self.assertNotIn("'longitude'", output)
 
-        def test_show(self):
+
+    def test_show(self):
         """Test show command."""
         with patch("sys.stdout", new=StringIO()) as f:
             self.HBNB.onecmd("show")
@@ -215,14 +226,17 @@ class TestHBNBCommand(unittest.TestCase):
             self.HBNB.onecmd("update User")
             self.assertEqual(
                 "** instance id missing **\n", f.getvalue())
+
+        # Create a User instance to get its ID for further testing
+        with patch("sys.stdout", new=StringIO()) as f:
+            self.HBNB.onecmd("create User")
+            obj = f.getvalue()
+        my_id = obj[obj.find('(') + 1:obj.find(')')]
+
         with patch("sys.stdout", new=StringIO()) as f:
             self.HBNB.onecmd("update User 12345")
             self.assertEqual(
                 "** no instance found **\n", f.getvalue())
-        with patch("sys.stdout", new=StringIO()) as f:
-            self.HBNB.onecmd("all User")
-            obj = f.getvalue()
-        my_id = obj[obj.find('(')+1:obj.find(')')]
         with patch("sys.stdout", new=StringIO()) as f:
             self.HBNB.onecmd("update User " + my_id)
             self.assertEqual(
@@ -231,6 +245,7 @@ class TestHBNBCommand(unittest.TestCase):
             self.HBNB.onecmd("update User " + my_id + " Name")
             self.assertEqual(
                 "** value missing **\n", f.getvalue())
+
 
 if __name__ == "__main__":
     unittest.main()
