@@ -142,8 +142,7 @@ class TestHBNBCommand(unittest.TestCase):
     def test_create_kwargs(self):
         """Test create command with kwargs."""
         with patch("sys.stdout", new=StringIO()) as f:
-            call = ('create Place city_id="0001" name="My_house" '
-                    'number_rooms=4 latitude=37.77 longitude=a'
+            call = ('create Place city_id="0001" name="My_house" ''number_rooms=4 latitude=37.77 longitude=a'
                     )
             self.HBNB.onecmd(call)
             pl = f.getvalue().strip()

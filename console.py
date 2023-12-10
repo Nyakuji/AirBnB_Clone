@@ -68,14 +68,26 @@ class HBNBCommand(cmd.Cmd):
 
         # Split the arguments into class name and attributes
         args_list = shlex.split(args)
+
         if len(args_list) == 0:
             print("** class name missing **")
-        elif type_model not in HBNBCommand.__allowed_classes:
+            return
+
+        if args_list[0] not in HBNBCommand.__allowed_classes:
             print("** class doesn't exist **")
-        else:
-            selected_model = HBNBCommand.class_mapping[type_model]()
-            print(selected_model.id)
-            selected_model.save()
+            return
+
+        kwargs = {}
+        for arg in args_list[1:]:
+            if '=' in arg:
+                key, value = arg.split('=')
+                # Remove any quotes around the value
+                value = value.strip('"\'')
+                kwargs[key] = value
+
+        selected_model = HBNBCommand.class_mapping[args_list[0]](**kwargs)
+        print(selected_model.id)
+        selected_model.save()
 
     def do_show(self, arg):
         """
@@ -112,7 +124,7 @@ class HBNBCommand(cmd.Cmd):
         """
 
         if not arg:
-            print("** class name is missing **")
+            print("** class name missing **")
             return
 
         args = arg.split(' ')
@@ -121,7 +133,7 @@ class HBNBCommand(cmd.Cmd):
         if class_name not in HBNBCommand.__allowed_classes:
             print("** class doesn't exist **")
         elif len(args) == 1:
-            print("** instance id is missing **")
+            print("** instance id missing **")
         else:
             instance_id = args[1].strip('"')
             all_objs = storage.all()
@@ -170,16 +182,15 @@ class HBNBCommand(cmd.Cmd):
         Updates an instance based on the class name and id by adding
         or updating attribute (save the change into the JSON file)
         """
-
         if not arg:
             print("** class name missing **")
             return
 
-        concatenated_args = ""
-        for argv in arg.split(','):
-            concatenated_args += argv
+        # concatenated_args = ""
+        # for argv in arg.split(','):
+        #     concatenated_args += argv
 
-        args = shlex.split(concatenated_args)
+        args = shlex.split(arg)
 
         if args[0] not in HBNBCommand.__allowed_classes:
             print("** class doesn't exist **")
@@ -193,9 +204,9 @@ class HBNBCommand(cmd.Cmd):
                 ob_id = objc.id
 
                 if ob_name == args[0] and ob_id == args[1].strip('"'):
-                    if len(args) == 2:
+                    if len(args) < 3:
                         print("** attribute name missing **")
-                    elif len(args) == 3:
+                    elif len(args) < 4:
                         print("** value missing **")
                     else:
                         setattr(objc, args[2], args[3])
@@ -203,6 +214,55 @@ class HBNBCommand(cmd.Cmd):
                     return
 
             print("** no instance found **")
+
+    def strip_clean(self, args):
+        """strips the argument and return a string of command
+        Args:
+            args: input list of args
+        Return:
+            returns string of argumetns
+        """
+        new_list = []
+        new_list.append(args[0])
+        try:
+            my_dict = eval(
+                args[1][args[1].find('{'):args[1].find('}')+1])
+        except Exception:
+            my_dict = None
+        if isinstance(my_dict, dict):
+            new_str = args[1][args[1].find('(')+1:args[1].find(')')]
+            new_list.append(((new_str.split(", "))[0]).strip('"'))
+            new_list.append(my_dict)
+            return new_list
+        new_str = args[1][args[1].find('(')+1:args[1].find(')')]
+        new_list.append(" ".join(new_str.split(", ")))
+        return " ".join(i for i in new_list)
+
+    def default(self, line):
+        """retrieve all instances of a class and
+        retrieve the number of instances
+        """
+        my_list = line.split('.')
+        if len(my_list) >= 2:
+            if my_list[1] == "all()":
+                self.do_all(my_list[0])
+            elif my_list[1] == "count()":
+                self.do_count(my_list[0])
+            elif my_list[1][:4] == "show":
+                self.do_show(self.strip_clean(my_list))
+            elif my_list[1][:7] == "destroy":
+                self.do_destroy(self.strip_clean(my_list))
+            elif my_list[1][:6] == "update":
+                args = self.strip_clean(my_list)
+                if isinstance(args, list):
+                    obj = storage.all()
+                    key = args[0] + ' ' + args[1]
+                    for k, v in args[2].items():
+                        self.do_update(key + ' "{}" "{}"'.format(k, v))
+                else:
+                    self.do_update(args)
+        else:
+            cmd.Cmd.default(self, line)
 
     def do_quit(self, line):
         """Quit command to exit the command interpreter"""

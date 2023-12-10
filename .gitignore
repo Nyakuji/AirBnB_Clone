@@ -2,3 +2,6 @@
 *~
 ~*
 file.json
+./test_models/*.swp
+*.swp
+*_user.py
