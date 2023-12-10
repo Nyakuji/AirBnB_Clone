@@ -80,28 +80,27 @@ class HBNBCommand(cmd.Cmd):
         Prints the string representation
         of an instance based on the class name and id
         """
-        
+
         if not arg:
             print("** class name missing **")
             return
 
         args = arg.split(' ')
-        
         class_name = args[0]
-        
+
         if class_name not in HBNBCommand.__allowed_classes:
             print("** class doesn't exist **")
         elif len(args) == 1:
             print("** instance id missing **")
         else:
-            instance_id = args[1].strip('"')
+            i_id = args[1].strip('"')
             all_objs = storage.all()
-            
+
             for value in all_objs.values():
-                if value.__class__.__name__ == class_name and value.id == instance_id:
+                if value.__class__.__name__ == class_name and value.id == i_id:
                     print(value)
                     return
-            
+
             print("** no instance found **")
 
     def do_destroy(self, arg):
@@ -113,10 +112,10 @@ class HBNBCommand(cmd.Cmd):
         if not arg:
             print("** class name is missing **")
             return
-        
+
         args = arg.split(' ')
         class_name = args[0]
-        
+
         if class_name not in HBNBCommand.__allowed_classes:
             print("** class doesn't exist **")
         elif len(args) == 1:
@@ -124,17 +123,17 @@ class HBNBCommand(cmd.Cmd):
         else:
             instance_id = args[1].strip('"')
             all_objs = storage.all()
-            
+
             for key, value in all_objs.items():
                 ob_name = value.__class__.__name__
                 ob_id = value.id
-                
+
                 if ob_name == class_name and ob_id == instance_id:
                     del value
                     del storage._FileStorage__objects[key]
                     storage.save()
                     return
-            
+
             print("** no instance found **")
 
     def do_all(self, arg):
@@ -142,26 +141,26 @@ class HBNBCommand(cmd.Cmd):
         Prints all string representation of all instances based or not
         on the class name
         """
-        
+
         if not arg:
             print("** class name is missing **")
             return
-            
+
         args = arg.split(' ')
         class_name = args[0]
-        
+
         if class_name not in HBNBCommand.__allowed_classes:
             print("** class doesn't exist **")
         else:
             all_objs = storage.all()
             list_instances = []
-            
+
             for key, value in all_objs.items():
                 ob_name = value.__class__.__name__
-                
+
                 if ob_name == class_name:
                     list_instances.append(str(value))
-            
+
             print(list_instances)
 
     def do_update(self, arg):
@@ -169,17 +168,17 @@ class HBNBCommand(cmd.Cmd):
         Updates an instance based on the class name and id by adding
         or updating attribute (save the change into the JSON file)
         """
-        
+
         if not arg:
             print("** class name missing **")
             return
-            
+
         concatenated_args = ""
         for argv in arg.split(','):
             concatenated_args += argv
-        
+
         args = shlex.split(concatenated_args)
-        
+
         if args[0] not in HBNBCommand.__allowed_classes:
             print("** class doesn't exist **")
         elif len(args) == 1:
@@ -189,7 +188,7 @@ class HBNBCommand(cmd.Cmd):
             for key, objc in all_objs.items():
                 ob_name = objc.__class__.__name__
                 ob_id = objc.id
-                
+
                 if ob_name == args[0] and ob_id == args[1].strip('"'):
                     if len(args) == 2:
                         print("** attribute name missing **")
@@ -199,7 +198,7 @@ class HBNBCommand(cmd.Cmd):
                         setattr(objc, args[2], args[3])
                         storage.save()
                     return
-            
+
             print("** no instance found **")
 
     def do_quit(self, line):
@@ -213,4 +212,3 @@ class HBNBCommand(cmd.Cmd):
 
 if __name__ == '__main__':
     HBNBCommand().cmdloop()
-
