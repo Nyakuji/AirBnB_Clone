@@ -5,3 +5,5 @@ file.json
 ./test_models/*.swp
 *.swp
 *_user.py
+__pycache__/*
+__pycache__/
