@@ -1,13 +1,16 @@
 #!/usr/bin/python3
 """
-Class FileStorage that serializes instances to a JSON file and deserializes JSON file to instances
+Class FileStorage that serializes instances
+to a JSON file and deserializes JSON file to instances
 """
 import json
 import os
 
 
 class FileStorage:
-    """Class that serializes instances to a JSON file and deserializes JSON file to instances"""
+    """Class that serializes instances to a
+    JSON file and deserializes JSON file to instances
+    """
 
     __file_path = "file.json"
     __objects = {}
@@ -23,7 +26,10 @@ class FileStorage:
 
     def save(self):
         """Serializes __objects to the JSON file"""
-        dictionary = {key: value.to_dict() for key, value in FileStorage.__objects.items()}
+        dictionary = {
+            key: value.to_dict()
+            for key, value in FileStorage.__objects.items()
+            }
 
         with open(FileStorage.__file_path, 'w') as f:
             json.dump(dictionary, f)
@@ -38,9 +44,15 @@ class FileStorage:
         from models.state import State
         from models.review import Review
 
-        class_mapping = {'BaseModel': BaseModel, 'User': User, 'Place': Place,
-                         'City': City, 'Amenity': Amenity, 'State': State,
-                         'Review': Review}
+        class_mapping = {
+            'BaseModel': BaseModel,
+            'User': User,
+            'Place': Place,
+            'City': City,
+            'Amenity': Amenity,
+            'State': State,
+            'Review': Review
+            }
 
         if os.path.exists(FileStorage.__file_path):
             with open(FileStorage.__file_path, 'r') as f:

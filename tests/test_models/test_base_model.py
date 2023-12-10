@@ -1,5 +1,4 @@
 #!/usr/bin/python3
-#!/usr/bin/python3
 """Module for unittest for base_model.py"""
 import unittest
 from models.base_model import BaseModel
@@ -27,7 +26,10 @@ class BaseModelTests(unittest.TestCase):
         self.assertEqual(self.my_model.id, my_model_json['id'])
 
     def test_save(self):
-        """Checks if save method updates the public instance attribute updated_at"""
+        """
+        Checks if save method updates
+        the public instance attribute updated_at
+        """
         self.my_model.first_name = "First"
         self.my_model.save()
 

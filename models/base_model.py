@@ -6,6 +6,7 @@ import uuid
 from datetime import datetime
 from models import storage
 
+
 class BaseModel:
     """Defines all common attributes/methods for other classes"""
     def __init__(self, *args, **kwargs):
@@ -26,7 +27,10 @@ class BaseModel:
     def __str__(self):
         """returns class name, id, and attribute dictionary"""
         class_name = "[" + self.__class__.__name__ + "]"
-        attribute_dict = {k: v for (k, v) in self.__dict__.items() if v is not None}
+        attribute_dict = {
+            k: v for (k, v) in
+            self.__dict__.items() if v is not None
+        }
         return f"{class_name} ({self.id}) {attribute_dict}"
 
     def save(self):

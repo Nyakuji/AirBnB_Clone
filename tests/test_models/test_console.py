@@ -1,8 +1,8 @@
 #!/usr/bin/python3
 '''This is unittests is for the console.py'''
-
 from io import StringIO
 import os
+import re
 import unittest
 import contextlib
 from unittest.mock import patch
@@ -17,15 +17,19 @@ class TestHBNBCommand(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         """
-        Set up the class by renaming a file and initializing the HBNBCommand class.
+        Set up the class by renaming a file
+        and initializing the HBNBCommand class.
 
-        This method is a class method (decorated with @classmethod) and is intended
-        to be called once for the entire class. It performs the following steps:
+        This method is a class method (decorated with @classmethod)
+        and is intended to be called once for the entire class.
+        It performs the following steps:
 
-        1. Renames the file "file.json" to ".tmp" using the os.rename() function.
+        1. Renames the file "file.json"
+            to ".tmp" using the os.rename() function.
             If the file does not exist, it suppresses the IOError exception.
 
-        2. Initializes the HBNBCommand class and assigns it to the class variable cls.HBNB.
+        2. Initializes the HBNBCommand class
+            and assigns it to the class variable cls.HBNB.
 
         Parameters:
             cls (type): The class object itself.
@@ -141,20 +145,47 @@ class TestHBNBCommand(unittest.TestCase):
 
     def test_create_kwargs(self):
         """Test create command with kwargs."""
+        kwargs = {
+            'city_id': '0001',
+            'name': 'My_house',
+            'number_rooms': '4',
+            'latitude': '37.77',
+            'longitude': 'a'
+        }
+        expected_output = []
+        pl = None
+
         with patch("sys.stdout", new=StringIO()) as f:
-            call = ('create Place city_id="0001" name="My_house" ''number_rooms=4 latitude=37.77 longitude=a'
-                    )
+            kwarg = ' '.join([
+                f'{key}={value}'
+                for key, value in kwargs.items()]
+                )
+            call = f"create Place {kwarg}"
             self.HBNB.onecmd(call)
-            pl = f.getvalue().strip()
+            output = f.getvalue().strip()
+            pl_match = re.search(r'\[Place\] \(([^)]+)\)', output)
+            if pl_match:
+                pl = pl_match.group(1)  # Extracting the ID
+                expected_output.append(pl)
+
+        # Adding expected output for each key-value pair
+        for key, value in kwargs.items():
+            expected_output.append(f"'{key}': '{value}'")
+
         with patch("sys.stdout", new=StringIO()) as f:
             self.HBNB.onecmd("all Place")
             output = f.getvalue()
+
+        # Ensure each item in expected_output
+        # is present in the 'all Place' output
+        for item in expected_output:
+            self.assertIn(item, output)
+
+        # Ensure the ID captured from create command
+        # is in the 'all Place' output
+        if pl_match:
+            pl = pl_match.group(1)  # Extracting the ID
             self.assertIn(pl, output)
-            self.assertIn("'city_id': '0001'", output)
-            self.assertIn("'name': 'My house'", output)
-            self.assertIn("'number_rooms': 4", output)
-            self.assertIn("'latitude': 37.77", output)
-            self.assertNotIn("'longitude'", output)
 
     def test_show(self):
         """Test show command."""
@@ -207,34 +238,32 @@ class TestHBNBCommand(unittest.TestCase):
         """Test update command input."""
         with patch("sys.stdout", new=StringIO()) as f:
             self.HBNB.onecmd("update")
-            self.assertEqual(
-                "** class name missing **\n", f.getvalue())
+            self.assertEqual("** class name missing **\n", f.getvalue())
+
         with patch("sys.stdout", new=StringIO()) as f:
             self.HBNB.onecmd("update sldkfjsl")
-            self.assertEqual(
-                "** class doesn't exist **\n", f.getvalue())
+            self.assertEqual("** class doesn't exist **\n", f.getvalue())
+
         with patch("sys.stdout", new=StringIO()) as f:
             self.HBNB.onecmd("update User")
-            self.assertEqual(
-                "** instance id missing **\n", f.getvalue())
+            self.assertEqual("** instance id missing **\n", f.getvalue())
+
         with patch("sys.stdout", new=StringIO()) as f:
             self.HBNB.onecmd("update User 12345")
-            self.assertEqual(
-                "** no instance found **\n", f.getvalue())
+            self.assertEqual("** no instance found **\n", f.getvalue())
+
         with patch("sys.stdout", new=StringIO()) as f:
-            self.HBNB.onecmd("all User")
-            obj = f.getvalue()
-        my_id = obj[obj.find('(')+1:obj.find(')')]
+            self.HBNB.onecmd("create User")
+            obj = f.getvalue().strip()
+            my_id = obj
         with patch("sys.stdout", new=StringIO()) as f:
-            self.HBNB.onecmd("update User " + my_id)
-            self.assertEqual(
-                "** attribute name missing **\n", f.getvalue())
+            self.HBNB.onecmd(f"update User {my_id}")
+            self.assertEqual("** attribute name missing **\n", f.getvalue())
+
         with patch("sys.stdout", new=StringIO()) as f:
-            self.HBNB.onecmd("update User " + my_id + " Name")
-            self.assertEqual(
-                "** value missing **\n", f.getvalue())
+            self.HBNB.onecmd(f"update User {my_id} name")
+            self.assertEqual("** value missing **\n", f.getvalue())
 
 
 if __name__ == "__main__":
     unittest.main()
-

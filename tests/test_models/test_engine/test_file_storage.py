@@ -15,7 +15,9 @@ class FileStorageTests(unittest.TestCase):
     def setUp(self):
         """Set up a temporary directory for testing"""
         self.temp_dir = tempfile.mkdtemp()
-        FileStorage._FileStorage__file_path = os.path.join(self.temp_dir,'file.json')
+        FileStorage._FileStorage__file_path = os.path.join(
+            self.temp_dir, 'file.json'
+            )
         self.storage = FileStorage()
         self.my_model = BaseModel()
 
