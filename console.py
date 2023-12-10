@@ -70,11 +70,7 @@ class HBNBCommand(cmd.Cmd):
         args_list = shlex.split(args)
         if len(args_list) == 0:
             print("** class name missing **")
-            return
-
-        class_name = args_list[0]
-
-        if class_name not in HBNBCommand.__allowed_classes:
+        elif type_model not in HBNBCommand.__allowed_classes:
             print("** class doesn't exist **")
         else:
             selected_model = HBNBCommand.class_mapping[type_model]()
@@ -157,7 +153,6 @@ class HBNBCommand(cmd.Cmd):
 
         if class_name not in HBNBCommand.__allowed_classes:
             print("** class doesn't exist **")
-            print("** class doesn't exist **")
         else:
             all_objs = storage.all()
             list_instances = []
@@ -178,7 +173,6 @@ class HBNBCommand(cmd.Cmd):
 
         if not arg:
             print("** class name missing **")
-            print("** class name missing **")
             return
 
         concatenated_args = ""
@@ -192,23 +186,23 @@ class HBNBCommand(cmd.Cmd):
             return
         elif len(args) < 2:
             print("** instance id missing **")
-            return
-        obj_key = args[0] + '.' + args[1]
-        all_objs = storage.all()
+        else:
+            all_objs = storage.all()
+            for key, objc in all_objs.items():
+                ob_name = objc.__class__.__name__
+                ob_id = objc.id
 
-        if obj_key not in all_objs:
+                if ob_name == args[0] and ob_id == args[1].strip('"'):
+                    if len(args) == 2:
+                        print("** attribute name missing **")
+                    elif len(args) == 3:
+                        print("** value missing **")
+                    else:
+                        setattr(objc, args[2], args[3])
+                        storage.save()
+                    return
+
             print("** no instance found **")
-            return
-        elif len(args) < 3:
-            print("** attribute name missing **")
-            return
-        elif len(args) < 4:
-            print("** value missing **")
-            return
-
-        obj_instance = all_objs[obj_key]
-        setattr(obj_instance, args[2], args[3])
-        storage.save()
 
     def do_quit(self, line):
         """Quit command to exit the command interpreter"""
