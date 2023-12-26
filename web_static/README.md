@@ -1,0 +1,1 @@
+Implementation of Web static on AirBnB-clone project [Front end]
